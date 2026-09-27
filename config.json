@@ -81,6 +81,48 @@
           "CASH": 1.0
         }
       }
+    },
+    "korea": {
+      "label": "국내 ETF (최대 2배 · 문턱은 원본 동일)",
+      "sma_window": 250,
+      "band_up": 0.01,
+      "band_down": -0.05,
+      "vix_window": 10,
+      "vix_up_threshold": 28.0,
+      "vix_down_threshold": 18.0,
+      "dd_window": 252,
+      "dd_threshold": -0.09,
+      "alloc": {
+        "UP_RISKON": {
+          "QLD": 1.0
+        },
+        "UP_RISKOFF": {
+          "QQQ": 0.5,
+          "QLD": 0.5
+        },
+        "DOWN_CALM": {
+          "QQQ": 0.5,
+          "QLD": 0.5
+        },
+        "DOWN_FEAR": {
+          "CASH": 1.0
+        }
+      },
+      "krx": {
+        "_comment": "국내 ETF 매핑. 주문안 계산(src/order_plan.py)에 쓴다. 코드는 주문 전 앱에서 확인.",
+        "QLD": {
+          "code": "418660",
+          "name": "TIGER 미국나스닥100레버리지(합성)"
+        },
+        "QQQ": {
+          "code": "133690",
+          "name": "TIGER 미국나스닥100"
+        },
+        "CASH": {
+          "code": "357870",
+          "name": "TIGER CD금리투자KIS(합성)"
+        }
+      }
     }
   },
   "execution": {

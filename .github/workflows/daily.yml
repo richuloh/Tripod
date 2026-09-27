@@ -103,6 +103,20 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # 선택 — Secrets 에 TRIPOD_PORTFOLIO(계좌 JSON, portfolio.example.json 형식)를 넣어 두면
+      # 국내 ETF 주문안(매도·매수 수량)을 계산해 이슈에 덧붙인다. 없으면 조용히 건너뛴다.
+      # 계산이 실패해도(시세 조회 불가 등) 알림 자체는 막지 않는다.
+      - name: 주문안 계산 (국내 ETF · 선택)
+        if: steps.before.outputs.state != 'NONE' && steps.before.outputs.state != steps.build.outputs.state
+        continue-on-error: true
+        env:
+          TRIPOD_PORTFOLIO: ${{ secrets.TRIPOD_PORTFOLIO }}
+        run: |
+          if [ -n "$TRIPOD_PORTFOLIO" ]; then
+            python3 src/order_plan.py --preset korea --markdown > /tmp/order_plan.md \
+              || echo "주문안 계산 실패 — 시세 조회를 확인하세요. 로컬에서 \`python3 src/order_plan.py\` 로 다시 계산할 수 있습니다." > /tmp/order_plan.md
+          fi
+
       - name: 신호 변경 시 이슈 생성 (= 메일 알림)
         if: steps.before.outputs.state != 'NONE' && steps.before.outputs.state != steps.build.outputs.state
         uses: actions/github-script@v7
@@ -112,6 +126,8 @@ jobs:
             const s = JSON.parse(fs.readFileSync('docs/state.json', 'utf8'));
             const p = s.params;
             const pages = `https://${context.repo.owner}.github.io/${context.repo.repo}/`;
+            const orderPlan = fs.existsSync('/tmp/order_plan.md')
+              ? ['', fs.readFileSync('/tmp/order_plan.md', 'utf8'), ''] : [];
             const body = [
               `## ${s.asof} · ${s.state_label}`,
               ``,
@@ -128,6 +144,7 @@ jobs:
               `나스닥100 ${s.ndx.toLocaleString()} · 250일선 ${s.sma.toLocaleString()} · 52주 고점 ${s.high52.toLocaleString()}`,
               ``,
               `대시보드: ${pages}`,
+              ...orderPlan,
               ``,
               `---`,
               `<sub>이 이슈는 신호가 바뀐 날에만 자동 생성됩니다. 확인 후 닫으세요.</sub>`,

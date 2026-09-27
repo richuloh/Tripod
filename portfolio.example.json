@@ -1,0 +1,9 @@
+{
+  "_comment": "portfolio.json 으로 복사해서 채운다. cash = 예수금(원), holdings = 종목코드: 보유수량. portfolio.json 은 .gitignore 되어 있다.",
+  "cash": 10000000,
+  "holdings": {
+    "418660": 0,
+    "133690": 0,
+    "357870": 0
+  }
+}

@@ -1,0 +1,4 @@
+# 계좌 정보 — 절대 커밋하지 않는다
+portfolio.json
+backtest_summary.json
+__pycache__/
