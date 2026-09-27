@@ -76,8 +76,8 @@ def fmt_won(x):
     return f"{x:,.0f}원"
 
 
-def render_text(state, target, p, asof):
-    out = [f"[{asof}] {STATE_LABEL[state]}  →  {target_text(target)}",
+def render_text(state, target, p, asof, labels=None):
+    out = [f"[{asof}] {STATE_LABEL[state]}  →  {target_text(target, labels)}",
            f"평가액 {fmt_won(p['total'])} (예수금 {fmt_won(p['cash_before'])})", ""]
     if not p["sells"] and not p["buys"]:
         out.append("주문 없음 — 이미 목표배분과 일치합니다.")
@@ -98,9 +98,9 @@ def render_text(state, target, p, asof):
     return "\n".join(out)
 
 
-def render_md(state, target, p, asof, price_src):
+def render_md(state, target, p, asof, price_src, labels=None):
     out = ["### 주문안 (국내 ETF)", "",
-           f"판정 **{STATE_LABEL[state]}** → 목표 **{target_text(target)}**  ",
+           f"판정 **{STATE_LABEL[state]}** → 목표 **{target_text(target, labels)}**  ",
            f"평가액 {fmt_won(p['total'])} · 예수금 {fmt_won(p['cash_before'])} · 시세 {price_src}", ""]
     if not p["sells"] and not p["buys"]:
         out.append("주문 없음 — 이미 목표배분과 일치합니다.")
@@ -142,6 +142,7 @@ def main():
     cur = live[-1]
     state = a.state or cur["state"]
     target = dict(cfg["params"]["alloc"][state])
+    labels = cfg["params"].get("labels")
 
     manual = {}
     for s in a.price:
@@ -165,9 +166,9 @@ def main():
 
     p = plan(target, krx, port, prices, a.fee_bps)
     if a.markdown:
-        print(render_md(state, target, p, cur["date"], price_src))
+        print(render_md(state, target, p, cur["date"], price_src, labels))
     else:
-        print(render_text(state, target, p, cur["date"]))
+        print(render_text(state, target, p, cur["date"], labels))
         if a.state:
             print(f"(가정: {STATE_LABEL[state]} — 현재 실제 판정은 {STATE_LABEL[cur['state']]})")
 

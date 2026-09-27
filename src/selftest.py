@@ -120,19 +120,30 @@ except fetch.FetchError:
     check("소스 불일치 감지", "예외 발생", "예외 발생")
 
 # ── 3. 35년 백테스트 골든값 ─────────────────────────────────────
-cfg, rows = build()
-cfg["backtest"]["end"] = FROZEN_END          # 데이터가 늘어나도 골든값은 고정
-curve, trades, bench = run(rows, cfg, cfg["backtest"]["start"], FROZEN_END)
-s = stats(curve)
-check("백테스트 CAGR", round(s["cagr"] * 100, 1), 33.2, 0.05, "%")
-check("백테스트 MDD", round(s["mdd"] * 100, 1), -61.9, 0.05, "%")
-check("백테스트 울서지수", round(s["ulcer"], 1), 29.9, 0.05)
-check("백테스트 소르티노", round(s["sortino"], 2), 1.17, 0.005)
-check("백테스트 매매횟수", len(trades), 283)
+# 프리셋별 골든값. 'original' 은 항상 검사한다(원본과 동일한 시스템이라는 증명).
+# 활성 프리셋이 다른 것이면 그 프리셋의 골든값도 검사한다. 새 프리셋을 활성화하려면 여기에 값을 추가한다.
+GOLDEN = {
+    "original": {"cagr": 33.2, "mdd": -61.9, "ulcer": 29.9, "sortino": 1.17, "trades": 283},
+    "korea":    {"cagr": 26.8, "mdd": -53.1, "ulcer": 22.3, "sortino": 1.19, "trades": 283},
+}
+active = build()[0]["params"]["name"]
+if active not in GOLDEN:
+    check(f"활성 프리셋 '{active}' 골든값", "없음", "GOLDEN 에 등록")
+for name in sorted({"original", active} & set(GOLDEN)):
+    cfg, rows = build(preset=name)
+    cfg["backtest"]["end"] = FROZEN_END          # 데이터가 늘어나도 골든값은 고정
+    curve, trades, bench = run(rows, cfg, cfg["backtest"]["start"], FROZEN_END)
+    s, g = stats(curve), GOLDEN[name]
+    check(f"[{name}] 백테스트 CAGR", round(s["cagr"] * 100, 1), g["cagr"], 0.05, "%")
+    check(f"[{name}] 백테스트 MDD", round(s["mdd"] * 100, 1), g["mdd"], 0.05, "%")
+    check(f"[{name}] 백테스트 울서지수", round(s["ulcer"], 1), g["ulcer"], 0.05)
+    check(f"[{name}] 백테스트 소르티노", round(s["sortino"], 2), g["sortino"], 0.005)
+    check(f"[{name}] 백테스트 매매횟수", len(trades), g["trades"])
 for k, cagr, mdd in (("QQQ", 15.3, -82.8), ("QLD", 19.6, -98.8), ("TQQQ", 16.3, -100.0)):
     bs = stats(bench[k])
     check(f"{k} CAGR", round(bs["cagr"] * 100, 1), cagr, 0.05, "%")
     check(f"{k} MDD", round(bs["mdd"] * 100, 1), mdd, 0.05, "%")
+cfg, rows = build()                              # 이하 판정 검사는 활성 프리셋 기준 (문턱이 같으면 판정도 같다)
 
 # ── 4. 규칙 판정 — 알려진 날짜의 상태 ───────────────────────────
 idx = {r["date"]: r for r in rows}
@@ -160,4 +171,5 @@ if FAILS:
     sys.exit(1)
 cur = [r for r in rows if r["state"]][-1]
 print(f"\n전부 통과 — 원본과 동일한 시스템입니다.")
-print(f"현재 상태: {cur['date']} · {STATE_LABEL[cur['state']]} · {target_text(cur['target'])}")
+print(f"현재 상태: {cur['date']} · {STATE_LABEL[cur['state']]} · "
+      f"{target_text(cur['target'], cfg['params'].get('labels'))}  [프리셋 {cfg['params']['name']}]")

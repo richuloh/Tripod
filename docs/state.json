@@ -3,10 +3,10 @@
  "state": "UP_RISKON",
  "state_label": "상승 · 위험선호",
  "alloc": {
-  "TQQQ": 1.0
+  "QLD": 1.0
  },
- "alloc_text": "TQQQ 100%",
- "gear": 3.0,
+ "alloc_text": "나스닥100 2배 100%",
+ "gear": 2.0,
  "ndx": 30608.1,
  "sma": 26910.4,
  "gap_pct": 13.74,
@@ -15,18 +15,18 @@
  "dd_pct": -0.4,
  "changed_today": false,
  "prev_state": "UP_RISKON",
- "prev_alloc_text": "TQQQ 100%",
+ "prev_alloc_text": "나스닥100 2배 100%",
  "days_since_change": 57,
- "generated_at": "2026-09-26T10:05:40Z",
+ "generated_at": "2026-09-27T23:42:43Z",
  "last_change": {
   "signal_date": "20260730",
   "fill_date": "20260731",
   "from": "UP_RISKOFF",
   "to": "UP_RISKON",
-  "from_alloc": "QLD 50% + QQQ 50%",
-  "to_alloc": "TQQQ 100%",
+  "from_alloc": "나스닥100 2배 50% + 나스닥100 1배 50%",
+  "to_alloc": "나스닥100 2배 100%",
   "from_gear": 1.5,
-  "to_gear": 3.0
+  "to_gear": 2.0
  },
  "params": {
   "sma_window": 250,

@@ -1,6 +1,6 @@
 {
   "_comment": "송팀장 트라이팟 규칙 파라미터. 기본값 = 영상 원본값(2026-08-31 촬영분). preset을 바꾸면 매운맛/순한맛 튜닝 가능.",
-  "active_preset": "original",
+  "active_preset": "korea",
   "presets": {
     "original": {
       "label": "원본 (영상 공개값)",
@@ -107,6 +107,12 @@
         "DOWN_FEAR": {
           "CASH": 1.0
         }
+      },
+      "labels": {
+        "_comment": "대시보드·이슈 제목에 쓰는 표시명",
+        "QLD": "나스닥100 2배",
+        "QQQ": "나스닥100 1배",
+        "CASH": "CD금리"
       },
       "krx": {
         "_comment": "국내 ETF 매핑. 주문안 계산(src/order_plan.py)에 쓴다. 코드는 주문 전 앱에서 확인.",

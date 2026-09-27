@@ -15,6 +15,7 @@ HIST_YEARS = 3
 def build_payload(preset=None):
     cfg, rows = build(preset=preset)
     p = cfg["params"]
+    labels = p.get("labels")          # 프리셋 표시명 (없으면 티커)
     live = [r for r in rows if r["state"]]
     cur, prev = live[-1], live[-2]
 
@@ -29,7 +30,7 @@ def build_payload(preset=None):
             changes.append({
                 "signal_date": b["date"], "fill_date": fill,
                 "from": a["state"], "to": b["state"],
-                "from_alloc": target_text(a["target"]), "to_alloc": target_text(b["target"]),
+                "from_alloc": target_text(a["target"], labels), "to_alloc": target_text(b["target"], labels),
                 "from_gear": gear_of(a["target"]), "to_gear": gear_of(b["target"]),
             })
 
@@ -76,6 +77,9 @@ def build_payload(preset=None):
         "params": {k: p[k] for k in ("sma_window", "band_up", "band_down", "vix_window",
                                      "vix_up_threshold", "vix_down_threshold",
                                      "dd_window", "dd_threshold")},
+        "alloc_table": [{"state": st, "label": STATE_LABEL[st],
+                         "alloc_text": target_text(p["alloc"][st], labels),
+                         "gear": gear_of(p["alloc"][st])} for st in STATE_LABEL],
         "asof": cur["date"],
         "ndx": round(cur["ndx"], 2),
         "sma": round(cur["sma"], 2),
@@ -88,11 +92,11 @@ def build_payload(preset=None):
         "state": cur["state"],
         "state_label": STATE_LABEL[cur["state"]],
         "alloc": cur["target"],
-        "alloc_text": target_text(cur["target"]),
+        "alloc_text": target_text(cur["target"], labels),
         "gear": gear_of(cur["target"]),
         "changed_today": prev["state"] != cur["state"],
         "prev_state": prev["state"],
-        "prev_alloc_text": target_text(prev["target"]),
+        "prev_alloc_text": target_text(prev["target"], labels),
         "days_since_change": days_since,
         "last_change": last_change,
         "changes": changes[-40:],

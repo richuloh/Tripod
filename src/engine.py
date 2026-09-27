@@ -99,11 +99,14 @@ def gear_of(target):
     return sum(GEAR[k] * w for k, w in target.items()) if target else None
 
 
-def target_text(target):
+def target_text(target, labels=None):
+    """배분 → 사람이 읽는 문자열. labels(프리셋의 표시명)가 있으면 티커 대신 그 이름을 쓴다."""
     if not target:
         return "-"
     order = ["TQQQ", "QLD", "QQQ", "CASH"]
-    parts = [f"{k} {int(round(w*100))}%" for k in order if k in target for w in [target[k]]]
+    labels = labels or {}
+    parts = [f"{labels.get(k, k)} {int(round(w*100))}%"
+             for k in order if k in target for w in [target[k]]]
     return " + ".join(parts)
 
 

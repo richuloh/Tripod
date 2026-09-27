@@ -260,7 +260,7 @@ $('#v-badge').innerHTML = DATA.changed_today
   ? `<span class="changed">★ 오늘 신호 변경</span>`
   : `<span class="steady">변경 없음 · ${DATA.days_since_change}일째 유지</span>`;
 $('#v-note').innerHTML = DATA.changed_today
-  ? `직전 배분 <b>${DATA.prev_alloc_text}</b> 에서 바뀌었습니다. 규칙상 체결은 <b>다음 거래일</b>입니다.`
+  ? `직전 배분 <b>${DATA.prev_alloc_text}</b> 에서 바뀌었습니다. 국내 ETF는 <b>오늘 09:00 정규장</b>에서 주문하면 됩니다 (미국 기준 다음 거래일 체결).`
   : `마지막 변경은 ${dstr(DATA.last_change.signal_date)} (${DATA.last_change.to_alloc}). 어제와 같으면 아무것도 하지 않습니다.`;
 
 /* ── 세 다리 게이지 ── */
@@ -303,12 +303,14 @@ $('#legs').innerHTML = legs.map(L => {
 
 /* ── 규칙표 ── */
 $('#rule-params').textContent = `250일선 +${P.band_up*100}% / ${P.band_down*100}% · VIX10 ${P.vix_up_threshold}/${P.vix_down_threshold} · 낙폭 ${P.dd_threshold*100}%`;
-const RULES = [
-  ['UP_RISKON','상승',`VIX10 &lt; ${P.vix_up_threshold} <b>그리고</b> 낙폭 ${Math.abs(P.dd_threshold*100)}% 이내`,'TQQQ 100%','3.0×'],
-  ['UP_RISKOFF','상승',`VIX10 ≥ ${P.vix_up_threshold} <b>또는</b> 낙폭 ${Math.abs(P.dd_threshold*100)}% 초과`,'QQQ 50% + QLD 50%','1.5×'],
-  ['DOWN_CALM','하락',`VIX10 &lt; ${P.vix_down_threshold}`,'QQQ 50% + QLD 50%','1.5×'],
-  ['DOWN_FEAR','하락',`VIX10 ≥ ${P.vix_down_threshold}`,'현금 100%','0×'],
-];
+const COND = {
+  UP_RISKON:  ['상승',`VIX10 &lt; ${P.vix_up_threshold} <b>그리고</b> 낙폭 ${Math.abs(P.dd_threshold*100)}% 이내`],
+  UP_RISKOFF: ['상승',`VIX10 ≥ ${P.vix_up_threshold} <b>또는</b> 낙폭 ${Math.abs(P.dd_threshold*100)}% 초과`],
+  DOWN_CALM:  ['하락',`VIX10 &lt; ${P.vix_down_threshold}`],
+  DOWN_FEAR:  ['하락',`VIX10 ≥ ${P.vix_down_threshold}`],
+};
+// 배분·배수는 활성 프리셋(DATA.alloc_table)에서 가져온다 — 프리셋을 바꾸면 표도 따라 바뀐다
+const RULES = DATA.alloc_table.map(a=>[a.state, COND[a.state][0], COND[a.state][1], a.alloc_text, `${a.gear.toFixed(1)}×`]);
 $('#ruletable tbody').innerHTML = RULES.map(r=>`<tr class="${r[0]===DATA.state?'on':''}">
   <td><span class="pill ${PILL[r[0]]}">${r[1]}</span></td><td>${r[2]}</td>
   <td style="font-weight:600">${r[3]}</td><td class="n" style="text-align:right">${r[4]}</td></tr>`).join('');

@@ -2,7 +2,7 @@
 from engine import build, gear_of
 from backtest import run, stats, rolling, TD
 
-cfg, rows = build()
+cfg, rows = build(preset="original")     # 영상 수치와 대조하므로 항상 원본 프리셋
 bt = cfg["backtest"]
 curve, trades, bench = run(rows, cfg, bt["start"], bt["end"])
 D = {d: i for i, (d, v) in enumerate(curve)}
